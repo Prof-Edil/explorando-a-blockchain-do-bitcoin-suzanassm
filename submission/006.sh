@@ -3,16 +3,15 @@ RPC_CONNECT="84.247.182.145"
 RPC_USER="user_261"
 RPC_PASSWORD="Uu6LBPhhk9Fr"
 
-# Passo 1: Pegar a coinbase TXID do bloco 256,128
-BLOCK_256128=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getblockhash 256128)
-COINBASE_TX=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getblock $BLOCK_256128 | jq -r '.tx[0]')
 
-echo "$COINBASE_TX"
+#!/bin/bash
 
-# Passo 2: Procurar esse TXID no bloco 257,343
-BLOCK_257343=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getblockhash 257343)
-TXS=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getblock $BLOCK_257343 2)
+coinbase_txid=$(bitcoin-cli getblock $(bitcoin-cli getblockhash 256128) | jq -r '.tx[0]')
 
-SPENDING_TX=$(echo $TXS | jq -r --arg TXID "$COINBASE_TX" '.tx[] | select(.vin[].txid == $TXID) | .txid')
+blockhash=$(bitcoin-cli getblockhash 257343)
 
-echo "$SPENDING_TX"
+block=$(bitcoin-cli getblock $blockhash 2)
+
+spending_txid=$(echo $block | jq -r --arg txid "$coinbase_txid" '.tx[] | select(.vin[].txid == $txid) | .txid')
+
+echo $spending_txid

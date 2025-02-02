@@ -3,7 +3,10 @@
 RPC_CONNECT="84.247.182.145"
 RPC_USER="user_261"
 RPC_PASSWORD="Uu6LBPhhk9Fr"
-tx=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getrawtransaction "37d966a263350fe747f1c606b159987545844a493dd38d84b070027a895c4517" true)
-pubkeys=$(echo $tx | jq -r '.vin[] | select(.scriptSig.asm != null) | .scriptSig.asm | split(" ")[1]')
-multisig=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD createmultisig 1 "$pubkeys")
-echo $multisig | jq -r .address
+#!/bin/bash
+
+xpub="xpub6Cx5tvq6nACSLJdra1A6WjqTo1SgeUZRFqsX5ysEtVBMwhCCRa4kfgFqaT2o1kwL3esB1PsYr3CUdfRZYfLHJunNWUABKftK2NjHUtzDms2"
+descriptor="tr($xpub/100)"
+checked_descriptor=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD getdescriptorinfo "$descriptor" | jq -r '.descriptor')
+address=$(bitcoin-cli -rpcconnect=$RPC_CONNECT -rpcuser=$RPC_USER -rpcpassword=$RPC_PASSWORD deriveaddresses "$checked_descriptor" | jq -r '.[0]')
+echo "$address"

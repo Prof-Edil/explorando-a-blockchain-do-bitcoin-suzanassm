@@ -28,10 +28,6 @@ for input in $(echo "$decoded_tx" | jq -c '.vin[]'); do
     fi
 done
 
-echo "Public Keys:"
-for pubkey in "${pubkeys[@]}"; do
-    echo "$pubkey"
-done
 
 pubkey_json=$(printf '"%s",' "${pubkeys[@]}" | sed 's/,$//')
 
